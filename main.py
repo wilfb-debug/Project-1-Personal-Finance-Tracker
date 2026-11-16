@@ -1,10 +1,37 @@
-import json
+from storage import load_transactions, save_transactions
+from pathlib import Path
 
-# 1. Storage for transaction records (list of dictionaries)
-transactions = []
+DATA_FILE = Path("transactions.json")
+
+def load_transactions():
+    if not DATA_FILE.exists():
+        return []
+    with DATA_FILE.open("r", encoding="utf-8") as file:
+        return json.load(file)
+
+def save_transactions(transactions):
+    with DATA_FILE.open("w", encoding="utf-8") as file:
+        json.dump(transactions, file, indent=4)
+
+# Check if the transactions file exists
+transaction_file = Path("transactions.json")
+if transaction_file.exists():
+    with open(transaction_file, "r") as file:
+        transactions = json.load(file)
+else:
+    transactions = []
 
 def add_transaction():
-    amount = float(input("Enter amount ($): "))
+    while True:
+        try:
+            amount = float(input("Enter amount ($): "))
+            if amount <= 0:
+                print("Amount must be greater than $0. Please try again.")
+                continue
+            break
+        except ValueError:
+            print("Invalid input! Please enter a valid number (e.g., 50 or 12.50).")
+
     category = input("Enter category (e.g., Food, Rent, Salary): ").strip()
 
     # Keep asking until they type a valid type 
@@ -49,13 +76,6 @@ def display_menu():
     print("2. View Transactions")
     print("3. Exit")
 
-def load_transactions():
-    try:
-        with open("transactions.json", "r") as file:
-            return json.load(file)
-    except FileNotFoundError:
-        return []  # If the file doesn't exist yet, start with an empty list
-
 def main():
     global transactions
     transactions = load_transactions()
@@ -69,8 +89,7 @@ def main():
         elif choice == "2":
            view_transactions()
         elif choice == "3":
-            with open("transactions.json", "w") as file:
-                json.dump(transactions, file)
+            save_transactions(transactions)  
             print("Transactions saved. Goodbye!")   
             break
         else:
