@@ -22,7 +22,7 @@ A simple, dependency-free command-line application built in Python to help you t
    git clone [https://github.com/wilfb-debug/Project-1-Personal-Finance-Tracker.git](https://github.com/wilfb-debug/Project-1-Personal-Finance-Tracker.git)
 
 
-Exampl usage: 
+Example usage: 
 
 === Personal Finance Tracker ===
 1. Add Transaction
