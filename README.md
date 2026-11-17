@@ -26,7 +26,7 @@ Safe Saving & Loading: Managed in storage.py, which loads your past transactions
 
 
 
-##Getting Started
+## Getting Started
 1. Clone this repository to your local machine:
 
 git clone [https://github.com/wilfb-debug/Project-1-Personal-Finance-Tracker.git](https://github.com/wilfb-debug/Project-1-Personal-Finance-Tracker.git)
