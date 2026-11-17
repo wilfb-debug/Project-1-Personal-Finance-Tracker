@@ -3,24 +3,38 @@ from datetime import datetime
 transactions = load_transactions()
 
 def add_transaction():
+    # 1. Always ask for Amount first
     while True:
         try:
-            amount = float(input("Enter amount ($): "))
+            amount = float(input("Enter amount: ").strip())
             if amount <= 0:
-                raise ValueError("Amount must be greater than $0.")
+                raise ValueError("Amount must be greater than 0.")
             break
         except ValueError as e:
             print(f"Invalid input! {e} Please enter a positive number (e.g., 50 or 12.50).")
 
-    # Gather unique previously used categories (preserving order)
-    existing_categories = list(dict.fromkeys(t["category"].capitalize() for t in transactions))
+    # 2. Ask for Type (income or expense) before Category
+    while True:
+        trans_type = input("Is this 'income' or 'expense'?: ").strip().lower()
+        if trans_type in ["income", "expense"]:
+            break
+        print("Invalid type! Please type strictly 'income' or 'expense'.")
+
+    # 3. Ask for Category (showing previous categories, blocking 'income'/'expense')
+    existing_categories = list(
+        dict.fromkeys(
+            t["category"].capitalize()
+            for t in transactions
+            if t["category"].lower() not in ["income", "expense"]
+        )
+    )
 
     while True:
         if existing_categories:
             print("\nPrevious categories:")
             for idx, cat in enumerate(existing_categories, start=1):
                 print(f"  {idx}. {cat}")
-            cat_input = input("Pick a number above or type a new category: ").strip()
+            cat_input = input("Pick a category number above or type a new category (e.g., Food, Rent, Salary): ").strip()
 
             if cat_input.isdigit():
                 choice_idx = int(cat_input) - 1
@@ -37,18 +51,15 @@ def add_transaction():
             print("Category cannot be blank. Please enter a category.")
         elif not any(char.isalpha() for char in cat_input):
             print("Invalid category! Please enter a text name (e.g., Food, Rent), not just numbers.")
+        elif cat_input.lower() in ["income", "expense"]:
+            print("That's the transaction type! Please enter a specific category like Food, Rent, or Salary.")
         else:
             category = cat_input.capitalize()
             break
 
-    while True:
-        trans_type = input("Enter type (income or expense): ").strip().lower()
-        if trans_type in ["income", "expense"]:
-            break
-        print("Invalid type! Please type strictly 'income' or 'expense'.")
-
-    date_input = input("Enter date (YYYY-MM-DD) or press Enter for today: ").strip()
-    date_str = date_input if date_input else datetime.now().strftime("%Y-%m-%d")
+    # 4. Date in DD-MM-YYYY format
+    date_input = input("Enter date (DD-MM-YYYY) or press Enter for today: ").strip()
+    date_str = date_input if date_input else datetime.now().strftime("%d-%m-%Y")
 
     transaction = {
         "amount": amount,
@@ -58,8 +69,8 @@ def add_transaction():
     }
 
     transactions.append(transaction)
-    save_transactions(transactions)  # Auto-save immediately!
-    print(f"\nSuccess! Added and saved {trans_type} of ${amount:.2f} under '{category}' for {date_str}.")
+    save_transactions(transactions)
+    print(f"\nSuccess! Added and saved {trans_type} of {amount:.2f} under '{category}' on {date_str}.")
 
 def view_transactions():
     if not transactions:
@@ -73,8 +84,8 @@ def view_transactions():
         target_cat = input("Enter category to filter by: ").strip().lower()
         filtered = [t for t in transactions if t["category"].lower() == target_cat]
     elif filter_choice == "m":
-        target_month = input("Enter month (YYYY-MM, e.g., 2026-11): ").strip()
-        filtered = [t for t in transactions if t.get("date", "").startswith(target_month)]
+        target_month = input("Enter month (MM-YYYY, e.g., 11-2026): ").strip()
+        filtered = [t for t in transactions if t.get("date", "").endswith(target_month)]
     else:
         filtered = [t for t in transactions]
 
